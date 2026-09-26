@@ -441,18 +441,25 @@ public class FMRadioService extends Service implements IFMCommand {
         }
 
         @Override
-        public boolean scan() throws RemoteException {
+        public synchronized boolean scan() throws RemoteException {
             boolean result = false;
 
-            mScanning = true;
-            mScanBegin = true;
-            mStopScan = false;
-
             if (FMRadioUtil.checkCmdListComplete(mFMCmdList)) {
+                boolean wasScanning = mScanning;
+                boolean wasScanBegin = mScanBegin;
+                boolean wasStopScan = mStopScan;
+
+                mScanning = true;
+                mScanBegin = true;
+                mStopScan = false;
+
                 FMRadioUtil.addCmdToList(IFMCommand.FM_CMD_TUNE_COMPLETE, mFMCmdList);
                 result = mFMRadioJNI.tune(getMinFreq());
                 if (!result) {
                     FMRadioUtil.removeCmdFromList(IFMCommand.FM_CMD_TUNE_COMPLETE, mFMCmdList);
+                    mScanning = wasScanning;
+                    mScanBegin = wasScanBegin;
+                    mStopScan = wasStopScan;
                 }
             }
 
@@ -570,7 +577,7 @@ public class FMRadioService extends Service implements IFMCommand {
         }
 
         @Override
-        public boolean stopScan() throws RemoteException {
+        public synchronized boolean stopScan() throws RemoteException {
             mStopScan = true;
             return true;
         }
