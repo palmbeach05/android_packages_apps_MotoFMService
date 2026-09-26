@@ -441,7 +441,7 @@ public class FMRadioService extends Service implements IFMCommand {
         }
 
         @Override
-        public boolean scan() throws RemoteException {
+        public synchronized boolean scan() throws RemoteException {
             boolean result = false;
 
             if (FMRadioUtil.checkCmdListComplete(mFMCmdList)) {
@@ -577,7 +577,7 @@ public class FMRadioService extends Service implements IFMCommand {
         }
 
         @Override
-        public boolean stopScan() throws RemoteException {
+        public synchronized boolean stopScan() throws RemoteException {
             mStopScan = true;
             return true;
         }
